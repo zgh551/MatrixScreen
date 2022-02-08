@@ -11,3 +11,9 @@ $ idf.py create-project MatricScreen
 ```shell
 $ idf.py create-component -C components/sensor HDC1080 
 ```
+
+3. create i2c module
+
+```shell
+$ idf.py create-component -C components i2c_module
+```
