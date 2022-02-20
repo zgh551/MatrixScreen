@@ -1,2 +1,2 @@
-idf_component_register(SRCS "HDC1080.c"
+idf_component_register(SRCS "hdc1080.c"
                     INCLUDE_DIRS "include")

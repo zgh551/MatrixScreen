@@ -1,5 +1,4 @@
-menu "Example Configuration"
-
+menu "I2C Configuration"
     config I2C_MASTER_SCL
         int "SCL GPIO Num"
         default 6 if IDF_TARGET_ESP32C3
@@ -13,5 +12,4 @@ menu "Example Configuration"
         default 18 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
         help
             GPIO number for I2C Master data line.
-
 endmenu
