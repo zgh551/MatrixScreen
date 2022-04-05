@@ -143,7 +143,7 @@ void hdc1080_task(void)
         fTemperature = temperature * 165.0f / 65535.0f - 40.0f;
         fHumidity    = humidity * 100.0 / 65535.0f;
         // sHDC1080SensorPacket
-        ESP_LOGI(TAG, "HDC_1080 Trmperature:%3f, Humidity:%3f", fTemperature,
-                 fHumidity);
+        ESP_LOGI(TAG, "HDC_1080 Trmperature:%02f, Humidity:%02f[RH]",
+                 fTemperature, fHumidity);
     }
 }

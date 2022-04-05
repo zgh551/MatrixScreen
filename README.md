@@ -9,7 +9,7 @@ $ idf.py create-project MatricScreen
 ### 1.2. Create HDC1080 Sensor
 
 ```shell
-$ idf.py create-component -C components/sensor HDC1080 
+$ idf.py create-component -C components hdc1080 
 ```
 
 ### 1.3. Create I2C Module
@@ -18,11 +18,23 @@ $ idf.py create-component -C components/sensor HDC1080
 $ idf.py create-component -C components i2c_module
 ```
 
+### 1.4. Create CCS811 Sensor
+```shell
+$ idf.py create-component -C components ccs811
+```
+
 ## 2. Build Project
 ### 2.1. Set the Target Chip
 ```shell
 $ idf.py set-target esp32
 ```
 
+### 2.2. Configure Menu 
+```shell
+$ idf.py menuconfig
+```
 
-
+### 2.3. Build Project
+```shell
+$ idf.py build
+```
