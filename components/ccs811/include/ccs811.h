@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../gpio_module/include/gpio_module.h"
 #include "../../i2c_module/include/i2c_module.h"
 #include "esp_err.h"
 #include "esp_log.h"

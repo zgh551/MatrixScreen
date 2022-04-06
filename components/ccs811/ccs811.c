@@ -56,7 +56,7 @@ static esp_err_t ccs811_register_write_word(uint8_t reg_addr, uint16_t data1,
                                             uint16_t data2)
 {
     int ret;
-    uint8_t write_bu[5] = {
+    uint8_t write_buf[5] = {
         reg_addr, (uint8_t)((data1 >> 8) & 0xff), (uint8_t)(data1 & 0xff),
         (uint8_t)((data2 >> 8) & 0xff), (uint8_t)(data2 & 0xff)};
 
@@ -149,3 +149,25 @@ uint8_t getDataReady(void)
     return (reg_status & 0x08);
 }
 
+static void gpio_task_example(void *arg)
+{
+    uint32_t io_num;
+    for (;;) {
+        if (xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
+            printf("GPIO[%d] intr, val: %d\n", io_num, gpio_get_level(io_num));
+        }
+    }
+}
+
+static esp_err_t ccs811_init(void)
+{
+    CCS811_Reset(0);
+    CCS811_Wake(1);
+    vTaskDelay(100 / portTICK_RATE_MS);
+    CCS811_Reset(1);
+    CCS811_Wake(0);
+
+    // start gpio task
+    xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
+    return ESP_OK;
+}

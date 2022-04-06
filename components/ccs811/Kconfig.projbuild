@@ -1,19 +1,19 @@
 menu "CCS811 Configuration"
-    config nRESET:
-        int "Reset GPIO Num"
+    config nRESET_CCS811
+        int "nReset GPIO Num"
         default 6 if IDF_TARGET_ESP32C3
         default 5 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
         help
             GPIO number for reset chip mode.
 
-    config nWAKE:
-        int "WAKE GPIO Num"
+    config nWAKE_CCS811
+        int "nWAKE GPIO Num"
         default 5 if IDF_TARGET_ESP32C3
         default 17 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
         help
             GPIO number for wake up chip.
 
-    config nINT:
+    config nINT_CCS811
         int "Interrupt GPIO Num"
         default 4 if IDF_TARGET_ESP32C3
         default 16 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3

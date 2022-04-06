@@ -23,6 +23,11 @@ $ idf.py create-component -C components i2c_module
 $ idf.py create-component -C components ccs811
 ```
 
+### 1.5. Create GPIO module for output and interrupt function
+```shell
+$ idf.py create-component -C components gpio_module
+```
+
 ## 2. Build Project
 ### 2.1. Set the Target Chip
 ```shell
