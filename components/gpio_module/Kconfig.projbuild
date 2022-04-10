@@ -1,4 +1,4 @@
-menu "CCS811 Configuration"
+menu "GPIO Pin Configuration"
     config nRESET_CCS811
         int "nReset GPIO Num"
         default 6 if IDF_TARGET_ESP32C3

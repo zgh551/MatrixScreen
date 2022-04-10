@@ -12,6 +12,9 @@ static void IRAM_ATTR gpio_isr_handler(void* arg)
     xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
 }
 
+void CCS811_Wake(uint32_t v) { gpio_set_level(CCS811_nWAKE_IO, v); }
+void CCS811_Reset(uint32_t v) { gpio_set_level(CCS811_nRESET_IO, v); }
+
 void gpio_init(void)
 {
     // zero-initialize the config structure.
@@ -61,5 +64,3 @@ void interrupt_init(void)
     gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
 }
 
-void CCS811_Wake(uint32_t v) { gpio_set_level(CCS811_nWAKE_IO, v); }
-void CCS811_Reset(uint32_t v) { gpio_set_level(CCS811_nRESET_IO, v); }

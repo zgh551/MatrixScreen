@@ -2,9 +2,11 @@
 
 #include <stdio.h>
 
+#include "../../i2c_module/include/i2c_module.h"
 static const char *TAG = "HDC1080";
-QueueHandle_t HDC1080Queue;
-
+static HDC1080_SensorPacket sHDC1080SensorPacket;
+QueueHandle_t xHDC1080Queue;
+SemaphoreHandle_t xBinarySemaphoreSample;
 /**
  * @brief Write none a HDC1080 sensor register
  */
@@ -100,7 +102,32 @@ static esp_err_t hdc1080_write_configuration_register(uint8_t rst, uint8_t heat,
     return ret;
 }
 
-static esp_err_t hdc1080_init(void)
+static void hdc1080_task(void *arg)
+{
+    uint16_t temperature, humidity;
+    // float fTemperature, fHumidity;
+    while (1) {
+        // Wait for the sample single from ccs811
+        xSemaphoreTake(xBinarySemaphoreSample, portMAX_DELAY);
+
+        ESP_ERROR_CHECK(hdc1080_register_write_none(TEMPERATURE));
+        vTaskDelay(1 / portTICK_RATE_MS);
+        ESP_ERROR_CHECK(hdc1080_data_read_two(&temperature, &humidity));
+        sHDC1080SensorPacket.Temperature =
+            temperature * 165.0f / 65535.0f - 40.0f;
+        sHDC1080SensorPacket.Humidity = humidity * 100.0 / 65535.0f;
+        xQueueSend(xHDC1080Queue, (void *)&sHDC1080SensorPacket, 0);
+        /*
+        ESP_LOGI(TAG, "HDC_1080 Trmperature:%x, Humidity:%x", temperature,
+                  humidity);
+        ESP_LOGI(TAG, "HDC_1080 Trmperature:%02f, Humidity:%02f[RH]",
+                  sHDC1080SensorPacket.Temperature,
+                  sHDC1080SensorPacket.Humidity);
+        */
+    }
+}
+
+esp_err_t hdc1080_init(void)
 {
     // step1: get chip id
     ESP_ERROR_CHECK(hdc1080_register_read(DEVICE_ID, &DeviceID));
@@ -120,8 +147,9 @@ static esp_err_t hdc1080_init(void)
         ESP_ERROR_CHECK(hdc1080_write_configuration_register(
             NORMAL_OPERATION, HEATER_DISABLED, ACQUIRED_SEQUENCE,
             TEMP_RES_14BIT, HUMD_RES_14BIT));
-
-        HDC1080Queue = xQueueCreate(10, sizeof(HDC1080_SensorPacket));
+        xBinarySemaphoreSample = xSemaphoreCreateBinary();
+        xHDC1080Queue          = xQueueCreate(10, sizeof(HDC1080_SensorPacket));
+        xTaskCreate(hdc1080_task, "hdc1080 task", 2048, NULL, 10, NULL);
         return ESP_OK;
     }
     else {
@@ -129,21 +157,3 @@ static esp_err_t hdc1080_init(void)
     }
 }
 
-void hdc1080_task(void)
-{
-    uint16_t temperature, humidity;
-    float fTemperature, fHumidity;
-    ESP_ERROR_CHECK(hdc1080_init());
-    while (1) {
-        ESP_ERROR_CHECK(hdc1080_register_write_none(TEMPERATURE));
-        vTaskDelay(1000 / portTICK_RATE_MS);
-        ESP_ERROR_CHECK(hdc1080_data_read_two(&temperature, &humidity));
-        ESP_LOGI(TAG, "HDC_1080 Trmperature:%x, Humidity:%x", temperature,
-                 humidity);
-        fTemperature = temperature * 165.0f / 65535.0f - 40.0f;
-        fHumidity    = humidity * 100.0 / 65535.0f;
-        // sHDC1080SensorPacket
-        ESP_LOGI(TAG, "HDC_1080 Trmperature:%02f, Humidity:%02f[RH]",
-                 fTemperature, fHumidity);
-    }
-}

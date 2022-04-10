@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "ccs811.h"
 #include "esp_spi_flash.h"
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
@@ -29,5 +30,13 @@ void app_main(void)
     ESP_ERROR_CHECK(i2c_master_init());
     ESP_LOGI(TAG, "I2C initialized successfully");
 
-    hdc1080_task();
+    ESP_ERROR_CHECK(hdc1080_init());
+    ESP_LOGI(TAG, "hdc1080 initialized successfully");
+    ESP_ERROR_CHECK(ccs811_init());
+    ESP_LOGI(TAG, "ccs811 initialized successfully");
+
+    // Task Begin Scheduler
+    vTaskStartScheduler();
+    while (1) {
+    }
 }

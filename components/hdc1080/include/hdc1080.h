@@ -5,14 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../i2c_module/include/i2c_module.h"
 #include "esp_err.h"
 #include "esp_log.h"
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "freertos/semphr.h"
 #include "freertos/task.h"
-
 #define HDC1080_SENSOR_ADDR (0x40) /*!< slave address for HDC1080 sensor */
 /**
  * Define the hdc1080 register address:
@@ -54,14 +53,13 @@ typedef struct _HDC1080_SensorPacket {
     float Humidity;
 } HDC1080_SensorPacket;
 
-static HDC1080_SensorPacket sHDC1080SensorPacket;
-extern QueueHandle_t HDC1080_SensorQueue;
+extern QueueHandle_t xHDC1080Queue;
+extern SemaphoreHandle_t xBinarySemaphoreSample;
 
 static uint16_t DeviceID       = 0;
 static uint16_t ManufacturerID = 0;
 static uint64_t SerialID       = 0;
 
-void hdc1080_task(void);
-
+esp_err_t hdc1080_init(void);
 #endif
 
