@@ -6,6 +6,7 @@
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "gpio_module.h"
 #include "hdc1080.h"
 #include "i2c_module.h"
 
@@ -37,6 +38,11 @@ extern "C" void app_main(void)
 
     ESP_ERROR_CHECK(hdc1080_init());
     ESP_LOGI(TAG, "hdc1080 initialized successfully");
+
+    // init gpio for output pin: nReset and nWake
+    gpio_init();
+    // init gpio for data ready interrupt
+    interrupt_init();
     ESP_ERROR_CHECK(ccs811_init());
     ESP_LOGI(TAG, "ccs811 initialized successfully");
 

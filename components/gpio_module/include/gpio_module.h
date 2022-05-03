@@ -27,10 +27,14 @@ extern QueueHandle_t gpio_evt_queue;
 void gpio_init(void);
 void interrupt_init(void);
 
-void CCS811_Wake(uint32_t v);
-void CCS811_Reset(uint32_t v);
+void setWake(uint32_t v);
+void setReset(uint32_t v);
+
+int getWake(void);
+int getReset(void);
 
 #ifdef __cplusplus
 }
 #endif
+
 #endif

@@ -141,9 +141,30 @@ static esp_err_t ccs811_data_read_two(uint16_t *data1, uint16_t *data2)
 
 /********************** CCS811 Function ***********************/
 
+static void swReset(void)
+{
+    ESP_ERROR_CHECK(ccs811_register_write_word(SW_RESET, 0x11E5, 0x728A));
+}
+
+static uint8_t getError(void)
+{
+    uint8_t reg_error;
+    ccs811_register_read_byte(ERROR_ID, &reg_error);
+    ESP_LOGI(TAG, "error:%x", reg_error);
+    return reg_error;
+}
+
 /*
  * get status register
  */
+static uint8_t getStatus(void)
+{
+    uint8_t reg_status;
+    ccs811_register_read_byte(STATUS, &reg_status);
+    ESP_LOGI(TAG, "status:%x", reg_status);
+    return reg_status;
+}
+
 uint8_t getFirmwareMode(void)
 {
     uint8_t reg_status;
@@ -174,7 +195,7 @@ uint8_t getDataReady(void)
 
 static void isrDataSampleTask(void *arg)
 {
-    ESP_LOGI(TAG, "ISR Interrupt For Sample Data");
+    ESP_LOGI(TAG, "CCS811 ISR Interrupt For Sample Data");
     uint32_t io_num;
     for (;;) {
         if (xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
@@ -188,16 +209,35 @@ static void isrDataSampleTask(void *arg)
 static void ccs811_task(void *arg)
 {
     uint8_t mode;
-    ccs811_work_state_ = ConstantPowerMode;
+    ccs811_work_state_ = IdleMode;
+    ESP_LOGI(TAG, "CCS811 State Machine Task");
     for (;;) {
         switch (ccs811_work_state_) {
             case IdleMode:
+                mode = DRIVE_MODE_IDLE;
+                ESP_ERROR_CHECK(ccs811_register_write_byte(MEAS_MODE, mode));
+                ccs811_work_state_ = ConstantPowerMode;
+                uint8_t mode_temp1;
                 ESP_ERROR_CHECK(
-                    ccs811_register_write_byte(MEAS_MODE, DRIVE_MODE_IDLE));
+                    ccs811_register_read_byte(MEAS_MODE, &mode_temp1));
+                ESP_LOGI(TAG, "CCS811 last mode:%x", mode_temp1);
                 break;
 
             case ConstantPowerMode:  // IAQ measurement every second
                 mode = DRIVE_MODE_1SEC | INTERRUPT_DRIVEN;
+                ESP_LOGI(TAG, "mode:%x", mode);
+                uint8_t reg_status;
+                ccs811_register_read_byte(STATUS, &reg_status);
+                ESP_LOGI(TAG, "status:%x", reg_status);
+
+                uint8_t err_status;
+                ccs811_register_read_byte(ERROR_ID, &err_status);
+                ESP_LOGI(TAG, "err status:%x", err_status);
+                uint8_t mode_temp;
+                ESP_ERROR_CHECK(
+                    ccs811_register_read_byte(MEAS_MODE, &mode_temp));
+                ESP_LOGI(TAG, "CCS811 last mode:%x", mode_temp);
+
                 ESP_ERROR_CHECK(ccs811_register_write_byte(MEAS_MODE, mode));
                 ccs811_work_state_ = EnvironmentalCompensation;
                 break;
@@ -239,21 +279,23 @@ static void ccs811_task(void *arg)
 
 esp_err_t ccs811_init(void)
 {
-    // Power On delay 20ms for i2c transform
-    CCS811_Reset(0);                   // enable reset single
-    CCS811_Wake(1);                    // set hight level for idle mode
-    vTaskDelay(1 / portTICK_RATE_MS);  // reset single keep low at leat 15us
-    CCS811_Reset(1);                   // disable reset single
-    CCS811_Wake(0);                    // set to low level for wake up chip
-    vTaskDelay(2 / portTICK_RATE_MS);  // wait at least 2ms for i2c operation
-
     uint8_t hardware_version;
     uint8_t hardware_id;
     uint16_t firmware_bootloader_version;
     uint16_t firmware_application_version;
 
+    // Power On delay 20ms for i2c transform
+    setReset(0);                         // enable reset single
+    setWake(1);                          // set hight level for idle mode
+    vTaskDelay(1 / portTICK_RATE_MS);    // reset single keep low at leat 15us
+    setReset(1);                         // disable reset single
+    setWake(0);                          // set to low level for wake up chip
+    vTaskDelay(200 / portTICK_RATE_MS);  // wait at least 2ms for i2c operation
+    swReset();
+    vTaskDelay(20 / portTICK_RATE_MS);  // wait at least 2ms for i2c operation
+
     ESP_ERROR_CHECK(ccs811_register_read_byte(HW_ID, &hardware_id));
-    ESP_LOGI(TAG, "CCS811 Hardware ID:%d", hardware_id);
+    ESP_LOGI(TAG, "CCS811 Hardware ID:%x", hardware_id);
     ESP_ERROR_CHECK(ccs811_register_read_byte(HW_VERSION, &hardware_version));
     ESP_LOGI(TAG, "CCS811 Hardware Version:%d", hardware_version);
     ESP_ERROR_CHECK(ccs811_register_read_hword(FW_BOOT_VERSION,
@@ -269,19 +311,13 @@ esp_err_t ccs811_init(void)
              (firmware_application_version >> 8) & 0x0f,
              firmware_application_version & 0xff);
     if (0x81 == hardware_id) {
-        if (1 == getAppValid()) {
-            // wait at least 20ms for i2c operation
-            vTaskDelay(20 / portTICK_RATE_MS);
+        if (0x10 == getStatus()) {
             // Start Application from Boot mode
             ESP_ERROR_CHECK(ccs811_register_write_none(APP_START));
             // wait at least 1ms for i2c operation
-            vTaskDelay(1 / portTICK_RATE_MS);
+            vTaskDelay(10 / portTICK_RATE_MS);
             // judge whether in application mode
-            if (1 == getFirmwareMode()) {
-                // init gpio for output pin: nReset and nWake
-                gpio_init();
-                // init gpio for data ready interrupt
-                interrupt_init();
+            if (0x90 == getStatus()) {
                 // Start GPIO Interrupt Task
                 xTaskCreate(isrDataSampleTask, "ccs811 interrupt task", 2048,
                             NULL, 10, NULL);
@@ -290,6 +326,7 @@ esp_err_t ccs811_init(void)
                 return ESP_OK;
             }
             else {
+                getError();
                 ESP_LOGE(TAG, "Firmware is in boot mode");
                 return ESP_FAIL;
             }
@@ -300,7 +337,7 @@ esp_err_t ccs811_init(void)
         }
     }
     else {
-        ESP_LOGE(TAG, "CCS811 Invalid Hardware ID:%d", hardware_id);
+        ESP_LOGE(TAG, "CCS811 Invalid Hardware ID:%x", hardware_id);
         return ESP_FAIL;
     }
 }
