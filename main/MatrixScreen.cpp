@@ -9,8 +9,12 @@
 #include "hdc1080.h"
 #include "i2c_module.h"
 
+#define NUM_LEDS 60
+CRGB leds[NUM_LEDS];
+
 static const char *TAG = "MatricScreen";
-void app_main(void)
+
+extern "C" void app_main(void)
 {
     /* Print chip information */
     esp_chip_info_t chip_info;
@@ -35,6 +39,14 @@ void app_main(void)
     ESP_LOGI(TAG, "hdc1080 initialized successfully");
     ESP_ERROR_CHECK(ccs811_init());
     ESP_LOGI(TAG, "ccs811 initialized successfully");
+
+    FastLED.addLeds<WS2812B, 19>(leds, NUM_LEDS);
+    leds[0] = CRGB::White;
+    FastLED.show();
+    delay(30);
+    leds[0] = CRGB::Black;
+    FastLED.show();
+    delay(30);
 
     // Task Begin Scheduler
     vTaskStartScheduler();

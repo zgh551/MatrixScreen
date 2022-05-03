@@ -1,6 +1,9 @@
 #ifndef __CCS811_H__
 #define __CCS811_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,4 +74,7 @@ extern QueueHandle_t xCCS811_SensorQueue;
 //  CCS811_State ccs811_state = Reset_CCS811;
 esp_err_t ccs811_init(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

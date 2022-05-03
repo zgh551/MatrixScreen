@@ -1,6 +1,9 @@
 #ifndef __GPIO_MODULE_H__
 #define __GPIO_MODULE_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "driver/gpio.h"
 #include "esp_err.h"
 #include "esp_log.h"
@@ -26,4 +29,8 @@ void interrupt_init(void);
 
 void CCS811_Wake(uint32_t v);
 void CCS811_Reset(uint32_t v);
+
+#ifdef __cplusplus
+}
+#endif
 #endif

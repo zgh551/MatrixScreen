@@ -1,6 +1,10 @@
 #ifndef __HDC_1080_H__
 #define __HDC_1080_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,5 +65,10 @@ static uint16_t ManufacturerID = 0;
 static uint64_t SerialID       = 0;
 
 esp_err_t hdc1080_init(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
 

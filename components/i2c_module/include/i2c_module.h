@@ -1,6 +1,10 @@
 #ifndef __I2C_MODULE_H__
 #define __I2C_MODULE_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "driver/i2c.h"
 #include "esp_err.h"
 #include "esp_log.h"
@@ -21,5 +25,9 @@
 #define I2C_MASTER_TIMEOUT_MS (1000)
 
 esp_err_t i2c_master_init(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
