@@ -1,0 +1,8 @@
+[submodule "components/fast_led/FastLED"]
+	path = components/fast_led/FastLED
+	url = git@github.com:FastLED/FastLED.git
+	branch = 3.5.0
+[submodule "components/arduino"]
+	path = components/arduino
+	url = git@github.com:espressif/arduino-esp32.git
+	branch = 2.0.3-RC1

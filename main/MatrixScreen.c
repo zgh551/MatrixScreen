@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "FastLED.h"
 #include "ccs811.h"
 #include "esp_spi_flash.h"
 #include "esp_system.h"

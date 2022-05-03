@@ -4,5 +4,6 @@
 # CMakeLists in this exact order for cmake to work correctly
 cmake_minimum_required(VERSION 3.5)
 
+add_definitions(-DESP32)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(MatrixScreen)
