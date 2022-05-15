@@ -1,45 +1,10 @@
 # Matric Screen
 
-## 1. Create Project Step
-### 1.1. Create main
-```shell
-$ idf.py create-project MatricScreen 
-```
 
-### 1.2. Create HDC1080 Sensor
+## Reference
 
-```shell
-$ idf.py create-component -C components hdc1080 
-```
+1. [Arduino as an ESP-IDF component](https://docs.espressif.com/projects/arduino-esp32/en/latest/esp-idf_component.html)
 
-### 1.3. Create I2C Module
+2. [arduino-esp32](https://github.com/espressif/arduino-esp32)
 
-```shell
-$ idf.py create-component -C components i2c_module
-```
-
-### 1.4. Create CCS811 Sensor
-```shell
-$ idf.py create-component -C components ccs811
-```
-
-### 1.5. Create GPIO module for output and interrupt function
-```shell
-$ idf.py create-component -C components gpio_module
-```
-
-## 2. Build Project
-### 2.1. Set the Target Chip
-```shell
-$ idf.py set-target esp32
-```
-
-### 2.2. Configure Menu 
-```shell
-$ idf.py menuconfig
-```
-
-### 2.3. Build Project
-```shell
-$ idf.py build
-```
+3. 

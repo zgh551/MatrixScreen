@@ -9,6 +9,7 @@
 #include "gpio_module.h"
 #include "hdc1080.h"
 #include "i2c_module.h"
+#include "smartconfig.h"
 
 #define NUM_LEDS 60
 CRGB leds[NUM_LEDS];
@@ -54,6 +55,7 @@ extern "C" void app_main(void)
     FastLED.show();
     delay(30);
 
+    init_smart_config();
     // Task Begin Scheduler
     vTaskStartScheduler();
     while (1) {
