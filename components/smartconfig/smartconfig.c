@@ -33,8 +33,8 @@ static void event_handler(void *arg, esp_event_base_t event_base,
                           int32_t event_id, void *event_data)
 {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        xTaskCreate(smartconfig_example_task, "smartconfig_example_task", 4096,
-                    NULL, 3, NULL);
+        xTaskCreate(smartconfig_example_task, "smartconfig_task", 4096, NULL, 3,
+                    NULL);
     }
     else if (event_base == WIFI_EVENT &&
              event_id == WIFI_EVENT_STA_DISCONNECTED) {
@@ -121,6 +121,7 @@ static void smartconfig_example_task(void *parm)
     ESP_ERROR_CHECK(esp_smartconfig_set_type(SC_TYPE_ESPTOUCH));
     smartconfig_start_config_t cfg = SMARTCONFIG_START_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_smartconfig_start(&cfg));
+
     while (1) {
         uxBits = xEventGroupWaitBits(s_wifi_event_group,
                                      CONNECTED_BIT | ESPTOUCH_DONE_BIT, true,

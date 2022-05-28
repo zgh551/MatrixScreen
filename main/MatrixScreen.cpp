@@ -21,6 +21,7 @@ extern "C" void app_main(void)
     /* Print chip information */
     esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
+    /*
     printf("This is %s chip with %d CPU core(s), WiFi%s%s, ", CONFIG_IDF_TARGET,
            chip_info.cores, (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
            (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
@@ -33,6 +34,7 @@ extern "C" void app_main(void)
 
     printf("Minimum free heap size: %d bytes\n",
            esp_get_minimum_free_heap_size());
+    */
 
     ESP_ERROR_CHECK(i2c_master_init());
     ESP_LOGI(TAG, "I2C initialized successfully");
@@ -44,20 +46,21 @@ extern "C" void app_main(void)
     gpio_init();
     // init gpio for data ready interrupt
     interrupt_init();
-    ESP_ERROR_CHECK(ccs811_init());
-    ESP_LOGI(TAG, "ccs811 initialized successfully");
-
+    // ESP_ERROR_CHECK(ccs811_init());
+    // ESP_LOGI(TAG, "ccs811 initialized successfully");
+    /*
     FastLED.addLeds<WS2812B, 19>(leds, NUM_LEDS);
     leds[0] = CRGB::White;
     FastLED.show();
     delay(30);
     leds[0] = CRGB::Black;
     FastLED.show();
-    delay(30);
+    delay(30);*/
 
     init_smart_config();
     // Task Begin Scheduler
-    vTaskStartScheduler();
+    // vTaskStartScheduler();
     while (1) {
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
